@@ -1,34 +1,41 @@
 const express = require("express");
-const path = require("path");
-const bodyParser = require("body-parser");
+const http = require("http");
+const socketIo = require("socket.io");
 
+// Create an Express app
 const app = express();
-const PORT = 3000;
 
-// Store action logs to show on the UI
-let actionLogs = [];
+// Create an HTTP server
+const server = http.createServer(app);
 
-// Set EJS as the view engine
-app.set("view engine", "ejs");
+// Attach socket.io to the HTTP server
+const io = socketIo(server);
 
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
-app.use(bodyParser.json());
+// Use Heroku's dynamic port, or fallback to 3000 for local development
+const PORT = process.env.PORT || 3000;
 
-// Serve the UI
+// Serve a simple message for the root route
 app.get("/", (req, res) => {
-  res.render("index", { logs: actionLogs });
+  res.send("WebSocket test server is running!");
 });
 
-// Handle logging actions from the client
-app.post("/log", (req, res) => {
-  const { message } = req.body;
-  actionLogs.push({ timestamp: new Date(), message });
-  if (actionLogs.length > 10) actionLogs.shift(); // Keep last 10 logs
-  res.status(200).send("Logged");
+// Handle WebSocket connections
+io.on("connection", (socket) => {
+  console.log("Client connected");
+
+  // Listen for 'click' events from any client (e.g., mobile app)
+  socket.on("click", () => {
+    console.log("Received click event");
+    io.emit("performClick"); // Broadcast the click event to all connected clients (PC, etc.)
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// Start the server and listen on the specified port
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
