@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A client application that listens to click events from a WebSocket server and simulates mouse clicks.",
   "main": "client.js",
+  "bin": "client.js",
   "scripts": {
     "start": "node client.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,5 +25,11 @@
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "pkg": {
+    "assets": [
+      "views/**/*",
+      "public/**/*"
+    ]
   }
 }
