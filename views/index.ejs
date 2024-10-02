@@ -4,16 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Click Event Log</title>
-    <link rel="stylesheet" href="/public/style.css" />
-    <script defer src="client.js"></script>
-    <!-- Client-side script -->
+    <style>
+      #log-container {
+        border: 1px solid #ccc;
+        padding: 20px;
+        max-width: 600px;
+        margin: 20px auto;
+        height: 300px;
+        overflow-y: scroll;
+      }
+      p {
+        font-family: Arial, sans-serif;
+      }
+    </style>
   </head>
   <body>
     <h1>Click Event Log</h1>
-    <div id="log-container">
-      <% logs.forEach(log => { %>
-      <p><%= log.timestamp.toLocaleString() %> - <%= log.message %></p>
-      <% }) %>
-    </div>
+    <div id="log-container"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      // Listen for log updates from the server
+      socket.on("updateLogs", (logs) => {
+        const logContainer = document.getElementById("log-container");
+        logContainer.innerHTML = ""; // Clear the container
+
+        // Append new logs to the UI
+        logs.forEach((log) => {
+          const logElement = document.createElement("p");
+          logElement.innerText = `${new Date(
+            log.timestamp
+          ).toLocaleString()} - ${log.message}`;
+          logContainer.appendChild(logElement);
+        });
+      });
+    </script>
   </body>
 </html>
